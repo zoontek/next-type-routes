@@ -1,4 +1,4 @@
-# next-typed-router
+# next-type-router
 
 🔬 An experiment to make next.js router usage safer.
 
@@ -7,9 +7,9 @@
 ## Installation
 
 ```bash
-$ yarn add next-typed-router
+$ yarn add next-type-router
 # --- or ---
-$ npm install --save next-typed-router
+$ npm install --save next-type-router
 ```
 
 ## Quickstart
@@ -26,7 +26,7 @@ First, you have to generate the typed router functions. For that, I recommend us
 When ran, this command parse your pages tree and generates a TS file (`src/router.ts`) which looks like this:
 
 ```ts
-import { createTypedFns } from "next-typed-router";
+import { createTypedFns } from "next-type-router";
 
 export const {
   createURL,
@@ -137,4 +137,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 What happen when I, let's say, use `useRouterWithSSR("/users/[userId]")` in page with `/project/[projectId]` path?<br>
 Well, it will throw an error 💥. That's why I **highly** recommand to create a [`500.tsx` page](https://nextjs.org/docs/advanced-features/custom-error-page#500-page) and wrap your app in an [Error Boundary](https://reactjs.org/docs/error-boundaries.html).
 
-![](https://github.com/zoontek/next-typed-router/blob/main/docs/screenshot.png?raw=true)
+![](https://github.com/zoontek/next-type-router/blob/main/docs/screenshot.png?raw=true)

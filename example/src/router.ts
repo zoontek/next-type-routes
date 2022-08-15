@@ -1,4 +1,4 @@
-import { createTypedFns } from "next-typed-router";
+import { createTypedFns } from "next-type-router";
 
 export const {
   createURL,

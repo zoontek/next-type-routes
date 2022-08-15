@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "next": "12.2.5",
-    "next-typed-router": "file:../",
+    "next-type-router": "file:../",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

@@ -1,13 +1,13 @@
 {
-  "name": "next-typed-router",
+  "name": "next-type-router",
   "version": "0.1.0",
   "license": "MIT",
   "description": "An experiment to make next.js router usage safer.",
   "author": "Mathieu Acthernoene <zoontek@gmail.com>",
-  "homepage": "https://github.com/zoontek/next-typed-router",
+  "homepage": "https://github.com/zoontek/next-type-router",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zoontek/next-typed-router.git"
+    "url": "https://github.com/zoontek/next-type-router.git"
   },
   "publishConfig": {
     "access": "public",

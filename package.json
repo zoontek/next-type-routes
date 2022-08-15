@@ -1,0 +1,63 @@
+{
+  "name": "next-typed-router",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "An experiment to make next.js router usage safer.",
+  "author": "Mathieu Acthernoene <zoontek@gmail.com>",
+  "homepage": "https://github.com/zoontek/next-typed-router",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zoontek/next-typed-router.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "source": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "type-router": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "hook",
+    "next",
+    "next.js",
+    "react",
+    "routing",
+    "router",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "format": "prettier '**/*' -u -w",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "prepack": "yarn test && yarn build"
+  },
+  "prettier": {
+    "trailingComma": "all"
+  },
+  "peerDependencies": {
+    "next": ">=12.2.0",
+    "react": ">=17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.4",
+    "commander": "^9.4.0",
+    "next": ">=12.2.0",
+    "pkg-dir": "^5.0.0",
+    "prettier": "^2.7.1",
+    "prettier-plugin-organize-imports": "^3.0.3",
+    "tsd": "^0.22.0",
+    "type-fest": "^2.18.0",
+    "typescript": "^4.7.4",
+    "vitest": "^0.21.1"
+  }
+}

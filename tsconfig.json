@@ -1,0 +1,41 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2015",
+    "lib": ["DOM", "ES2015"],
+    "moduleResolution": "Node",
+    "outDir": "dist/",
+
+    // Type Checking
+    "strict": true,
+
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // Emit
+    "declaration": true,
+    "esModuleInterop": true,
+    "noEmitOnError": true,
+    "sourceMap": true,
+    "stripInternal": true,
+
+    // JavaScript Support
+    "allowJs": false,
+
+    // Interop Constraints
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+
+    // Completeness
+    "skipLibCheck": true
+  }
+}

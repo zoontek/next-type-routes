@@ -1,0 +1,25 @@
+{
+  "name": "example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "type-router": "type-router src/router.ts",
+    "dev": "yarn type-router && next dev",
+    "build": "yarn type-router && next build",
+    "start": "next start",
+    "preinstall": "cd .. && yarn build && cd example",
+    "reinstall": "rm -rf ./node_modules && yarn"
+  },
+  "dependencies": {
+    "next": "12.2.5",
+    "next-typed-router": "file:../",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.7.4",
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6",
+    "typescript": "4.7.4"
+  }
+}

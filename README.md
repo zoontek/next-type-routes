@@ -140,6 +140,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 ## Error handling
 
 What happen when I, let's say, use `useRouterWithSSR("/users/[userId]")` in page with `/project/[projectId]` path?<br>
-Well, it will throw an error 💥. That's why I **highly** recommand to create a [`500.tsx` page](https://nextjs.org/docs/advanced-features/custom-error-page#500-page) and wrap your app in an [Error Boundary](https://reactjs.org/docs/error-boundaries.html).
+Well, it will throw an error 💥. That's why I **highly** recommend to create a [`500.tsx` page](https://nextjs.org/docs/advanced-features/custom-error-page#500-page) and wrap your app in an [Error Boundary](https://reactjs.org/docs/error-boundaries.html).
 
 ![](https://github.com/zoontek/next-type-router/blob/main/docs/screenshot.png?raw=true)

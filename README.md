@@ -1,12 +1,13 @@
-# next-type-router
+# 🔬 next-type-router
 
 [![mit licence](https://img.shields.io/dub/l/vibe-d.svg?style=for-the-badge)](https://github.com/zoontek/next-type-router/blob/main/LICENSE)
 [![npm version](https://img.shields.io/npm/v/next-type-router?style=for-the-badge)](https://www.npmjs.org/package/next-type-router)
 [![bundlephobia](https://img.shields.io/bundlephobia/minzip/next-type-router?label=size&style=for-the-badge)](https://bundlephobia.com/result?p=next-type-router)
 
-🔬 An experiment to make next.js router usage safer.
-
+An experiment to make next.js router usage safer.<br>
 **Heavily inspired by my work on [@swan-io/chicane](https://github.com/swan-io/chicane)**
+
+_⚠️ Don't use this in production (yet)!_
 
 ## Installation
 

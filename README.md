@@ -2,7 +2,7 @@
 
 🔬 An experiment to make next.js router usage safer.
 
-**Heavily inspired by my work [@swan-io/chicane](https://github.com/swan-io/chicane)**
+**Heavily inspired by my work on [@swan-io/chicane](https://github.com/swan-io/chicane)**
 
 ## Installation
 

@@ -1,6 +1,6 @@
 # next-typed-router
 
-An experiment to make next.js router usage safer.
+🔬 An experiment to make next.js router usage safer.
 
 **Heavily inspired by my work [@swan-io/chicane](https://github.com/swan-io/chicane)**
 
@@ -90,7 +90,7 @@ export default function ExamplePage() {
 import { useRouterWithNoSSR } from "path/to/router";
 
 export default function ExamplePage() {
-  const { params } = useRouterWithNoSSR("/users/[userId]"); // we can't use useRouterWithSSR since getServerSideProps is not used
+  const { params } = useRouterWithNoSSR("/users/[userId]"); // we have to use useRouterWithNoSSR since getServerSideProps is not used
   const { userId } = params.route; // userId type is string | undefined
 
   if (userId == null) {
@@ -108,7 +108,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getApiRequestParams } from "path/to/router";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // We can access params in a safe way on API routes too!
+  // we can access params in a safe way on API routes
   const params = getApiRequestParams("/api/projects/[projectId]", req);
 
   res.status(200).json({ handler: "project", params });
@@ -122,11 +122,10 @@ import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { getServerSideParams } from "path/to/router";
 
-// This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const params = getServerSideParams("/users/[userId]", context);
 
-  // We can access params in a safe way on the server too!
+  // we can access params in a safe way on the server
   console.log(params.route.userId);
 
   return { props: {} };
@@ -135,4 +134,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 ## Error handling
 
-What happen when I, let's say, use `useRouterWithSSR("/users/[userId]")` in page with `/project/[projectId]`? Well, it will throw an error. That's why I highly recommand to create a `500.tsx` page and wrap your app in an Error Boundary.
+What happen when I, let's say, use `useRouterWithSSR("/users/[userId]")` in page with `/project/[projectId]` path?<br>
+Well, it will throw an error 💥. That's why I **highly** recommand to create a [`500.tsx` page](https://nextjs.org/docs/advanced-features/custom-error-page#500-page) and wrap your app in an [Error Boundary](https://reactjs.org/docs/error-boundaries.html).
+
+![](https://github.com/zoontek/next-typed-router/blob/main/docs/screenshot.png?raw=true)

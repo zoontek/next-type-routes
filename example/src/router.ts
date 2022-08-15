@@ -8,5 +8,13 @@ export const {
   useRouterWithNoSSR,
 } = createTypedFns([
   "/",
-  "/api/hello",
+  "/api/auth/login",
+  "/api/projects/[projectId]",
+  "/projects",
+  "/projects/[projectId]",
+  "/users",
+  "/users/[userId]",
+  "/users/[userId]/favorites/[[...rest]]",
+  "/users/[userId]/repositories",
+  "/users/[userId]/repositories/[repositoryId]",
 ]);

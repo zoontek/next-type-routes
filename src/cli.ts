@@ -1,66 +1,57 @@
 #! /usr/bin/env node
 
 import { Command } from "commander";
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 import pc from "picocolors";
 import pkgDir from "pkg-dir";
 
-const exists = async (dir: string) => {
-  try {
-    await fs.access(dir);
-    return dir;
-  } catch {
-    return;
-  }
-};
+const getFilesRecursive = (dir: string): string[] => {
+  const dirents = fs.readdirSync(dir, { withFileTypes: true });
 
-const getFiles = async (dir: string): Promise<string[]> => {
-  const dirents = await fs.readdir(dir, {
-    withFileTypes: true,
-  });
-
-  const files = await Promise.all(
-    dirents.map((dirent) => {
+  return dirents
+    .map((dirent) => {
       const item = path.resolve(dir, dirent.name);
 
       return dirent.isFile()
         ? item
         : dirent.isDirectory()
-        ? getFiles(item)
+        ? getFilesRecursive(item)
         : [];
-    }),
-  );
-
-  return files.flat();
+    })
+    .flat();
 };
 
-const generateFile = async (filePath: string) => {
-  const rootDir = (await pkgDir().catch(() => {})) ?? process.cwd();
+const getRouteFiles = (pagesDir: string) =>
+  getFilesRecursive(pagesDir)
+    .map((file) => path.parse(path.relative(pagesDir, file)))
+    .filter(
+      (file) =>
+        [".ts", ".tsx", ".js", ".jsx", ".mjs"].includes(file.ext) &&
+        !["404", "500", "_app", "_document", "_error"].includes(file.name),
+    );
 
-  const pagesDir = (
-    await Promise.all(
-      // https://github.com/blitz-js/blitz/blob/canary/nextjs/packages/next/build/utils.ts#L54-L59
-      ["pages", "src/pages", "app/pages", "integrations/pages"]
-        .map((dir) => path.join(rootDir, dir))
-        .map((dir) => exists(dir)),
-    )
-  ).find((dir): dir is string => {
-    return typeof dir === "string";
-  });
+const isApiRouteFile = (parsedPath: path.ParsedPath) =>
+  parsedPath.dir === "api" || parsedPath.dir.startsWith("api/");
+
+const generateFile = async (filePath: string) => {
+  const rootDir = pkgDir.sync() ?? process.cwd();
+
+  // https://github.com/blitz-js/blitz/blob/canary/nextjs/packages/next/build/utils.ts#L54-L59
+  const pagesDir = ["pages", "src/pages", "app/pages", "integrations/pages"]
+    .map((dir) => path.join(rootDir, dir))
+    .find(fs.existsSync);
 
   if (pagesDir == null) {
     console.log(pc.red("No pages directory detected! Skip routes generation…"));
     process.exit(1);
   }
 
-  const routes = (await getFiles(pagesDir))
-    .map((file) => path.parse(path.relative(pagesDir, file)))
-    .filter(
-      (file) =>
-        [".ts", ".tsx", ".js", ".jsx", ".mjs"].includes(file.ext) &&
-        !["404", "500", "_app", "_document", "_error"].includes(file.name),
-    )
+  const files = getRouteFiles(pagesDir);
+  const apiFiles = files.filter((file) => isApiRouteFile(file));
+  const pageFiles = files.filter((file) => !isApiRouteFile(file));
+
+  const routes = files
     .map((file) => {
       if (file.dir === "" && file.name === "index") {
         return "/";
@@ -74,7 +65,7 @@ const generateFile = async (filePath: string) => {
     .map((file) => `"${file}"`)
     .join(",\n  ");
 
-  await fs.writeFile(
+  await fs.writeFileSync(
     path.resolve(rootDir, filePath),
     `import { createTypedFns } from "next-type-routes";
 

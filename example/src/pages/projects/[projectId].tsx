@@ -1,4 +1,4 @@
-import { useRouterWithNoSSR } from "../../router";
+import { useRouterWithNoSSR } from "../../routes";
 
 export default function ProjectPage() {
   const { params } = useRouterWithNoSSR("/projects/[projectId]");

@@ -1,13 +1,13 @@
 {
-  "name": "next-type-router",
+  "name": "next-type-routes",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "An experiment to make next.js router usage safer.",
+  "description": "An experiment to make next.js routing usage safer.",
   "author": "Mathieu Acthernoene <zoontek@gmail.com>",
-  "homepage": "https://github.com/zoontek/next-type-router",
+  "homepage": "https://github.com/zoontek/next-type-routes",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zoontek/next-type-router.git"
+    "url": "https://github.com/zoontek/next-type-routes.git"
   },
   "publishConfig": {
     "access": "public",
@@ -17,7 +17,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "type-router": "./dist/cli.js"
+    "type-routes": "./dist/cli.js"
   },
   "files": [
     "dist"
@@ -45,11 +45,12 @@
     "trailingComma": "all"
   },
   "peerDependencies": {
-    "next": ">=12.2.0",
-    "react": ">=17.0.2"
+    "next": ">=12.2.5",
+    "react": ">=18.0.0",
+    "typescript": ">=4.7.0"
   },
   "devDependencies": {
-    "@types/node": "^18.7.4",
+    "@types/node": "^18.7.6",
     "commander": "^9.4.0",
     "next": ">=12.2.0",
     "pkg-dir": "^5.0.0",
@@ -58,6 +59,6 @@
     "tsd": "^0.22.0",
     "type-fest": "^2.18.0",
     "typescript": "^4.7.4",
-    "vitest": "^0.21.1"
+    "vitest": "^0.22.0"
   }
 }

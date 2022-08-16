@@ -1,4 +1,4 @@
-import { useRouterWithSSR } from "../../../../router";
+import { useRouterWithSSR } from "../../../../routes";
 
 export default function FavoritesArea() {
   const { params } = useRouterWithSSR("/users/[userId]/favorites/[[...rest]]");

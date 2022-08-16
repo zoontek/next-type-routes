@@ -50,7 +50,7 @@ const generateFile = async (filePath: string) => {
   });
 
   if (pagesDir == null) {
-    console.log(pc.red("No pages directory detected! Skip router generation…"));
+    console.log(pc.red("No pages directory detected! Skip routes generation…"));
     process.exit(1);
   }
 
@@ -76,7 +76,7 @@ const generateFile = async (filePath: string) => {
 
   await fs.writeFile(
     path.resolve(rootDir, filePath),
-    `import { createTypedFns } from "next-type-router";
+    `import { createTypedFns } from "next-type-routes";
 
 export const {
   createURL,
@@ -97,7 +97,7 @@ const program = new Command();
 program
   .command("generate", { isDefault: true })
   .argument("<filePath>", "file path")
-  .description("generate the router file")
+  .description("generate the routes file")
   .action((arg: string) => generateFile(arg));
 
 program.parse(process.argv);

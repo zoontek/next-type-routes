@@ -4,7 +4,7 @@ import {
   createURL,
   getServerSideParams,
   useRouterWithSSR,
-} from "../../../router";
+} from "../../../routes";
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async (context) => {

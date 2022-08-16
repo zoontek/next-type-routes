@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getApiRequestParams } from "../../../router";
+import { getApiRequestParams } from "../../../routes";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   // We can access params in a safe way on API routes too!

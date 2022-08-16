@@ -64,8 +64,8 @@ export const createTypedFns = <Route extends string>(routes: Route[]) => {
     useRouterWithSSR: <T extends NonApiRoute>(route: T) => {
       const { query, ...router } = useRouter();
 
-      if (router.pathname !== route) {
-        throw getError("useRouterWithSSR", router.pathname, route);
+      if (route !== router.pathname) {
+        throw getError("useRouterWithSSR", route, router.pathname);
       }
 
       return {
@@ -77,8 +77,8 @@ export const createTypedFns = <Route extends string>(routes: Route[]) => {
     useRouterWithNoSSR: <T extends NonApiRoute>(route: T) => {
       const { query, ...router } = useRouter();
 
-      if (router.pathname !== route) {
-        throw getError("useRouterWithNoSSR", router.pathname, route);
+      if (route !== router.pathname) {
+        throw getError("useRouterWithNoSSR", route, router.pathname);
       }
 
       return {

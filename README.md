@@ -1,10 +1,10 @@
-# 🔬 next-type-router
+# 🔬 next-type-routes
 
-[![mit licence](https://img.shields.io/dub/l/vibe-d.svg?style=for-the-badge)](https://github.com/zoontek/next-type-router/blob/main/LICENSE)
-[![npm version](https://img.shields.io/npm/v/next-type-router?style=for-the-badge)](https://www.npmjs.org/package/next-type-router)
-[![bundlephobia](https://img.shields.io/bundlephobia/minzip/next-type-router?label=size&style=for-the-badge)](https://bundlephobia.com/result?p=next-type-router)
+[![mit licence](https://img.shields.io/dub/l/vibe-d.svg?style=for-the-badge)](https://github.com/zoontek/next-type-routes/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/next-type-routes?style=for-the-badge)](https://www.npmjs.org/package/next-type-routes)
+[![bundlephobia](https://img.shields.io/bundlephobia/minzip/next-type-routes?label=size&style=for-the-badge)](https://bundlephobia.com/result?p=next-type-routes)
 
-An experiment to make next.js router usage safer.<br>
+An experiment to make next.js routes usage safer.<br>
 **Heavily inspired by my work on [@swan-io/chicane](https://github.com/swan-io/chicane)**
 
 _⚠️ Don't use this in production (yet)!_
@@ -12,26 +12,26 @@ _⚠️ Don't use this in production (yet)!_
 ## Installation
 
 ```bash
-$ yarn add next-type-router
+$ yarn add next-type-routes
 # --- or ---
-$ npm install --save next-type-router
+$ npm install --save next-type-routes
 ```
 
 ## Quickstart
 
-First, you have to generate the typed router functions. For that, I recommend using npm scripts:
+First, you have to generate the typed routes functions. For that, I recommend using npm scripts:
 
 ```json
 "scripts": {
-  "type-router": "type-router src/router.ts",
-  "dev": "yarn type-router && next dev",
-  "build": "yarn type-router && next build",
+  "type-routes": "type-routes src/routes.ts",
+  "dev": "yarn type-routes && next dev",
+  "build": "yarn type-routes && next build",
 ```
 
-When ran, this command parse your pages tree and generates a TS file (`src/router.ts`) which looks like this:
+When ran, this command parse your pages tree and generates a TS file (`src/routes.ts`) which looks like this:
 
 ```ts
-import { createTypedFns } from "next-type-router";
+import { createTypedFns } from "next-type-routes";
 
 export const {
   createURL,
@@ -60,7 +60,7 @@ export const {
 
 ```tsx
 import Link from "next/link";
-import { createURL } from "path/to/router";
+import { createURL } from "path/to/routes";
 
 export default function ExamplePage() {
   return (
@@ -79,7 +79,7 @@ export default function ExamplePage() {
 ### useRouterWithSSR
 
 ```tsx
-import { useRouterWithSSR } from "path/to/router";
+import { useRouterWithSSR } from "path/to/routes";
 
 export default function ExamplePage() {
   const { params } = useRouterWithSSR("/users/[userId]"); // we can use useRouterWithSSR since getServerSideProps is used
@@ -92,7 +92,7 @@ export default function ExamplePage() {
 ### useRouterWithNoSSR
 
 ```tsx
-import { useRouterWithNoSSR } from "path/to/router";
+import { useRouterWithNoSSR } from "path/to/routes";
 
 export default function ExamplePage() {
   const { params } = useRouterWithNoSSR("/users/[userId]"); // we have to use useRouterWithNoSSR since getServerSideProps is not used
@@ -110,7 +110,7 @@ export default function ExamplePage() {
 
 ```ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getApiRequestParams } from "path/to/router";
+import { getApiRequestParams } from "path/to/routes";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   // we can access params in a safe way on API routes
@@ -125,7 +125,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 ```ts
 import { GetServerSideProps } from "next";
 import Link from "next/link";
-import { getServerSideParams } from "path/to/router";
+import { getServerSideParams } from "path/to/routes";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const params = getServerSideParams("/users/[userId]", context);
@@ -142,4 +142,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 What happen when I, let's say, use `useRouterWithSSR("/users/[userId]")` in page with `/project/[projectId]` path?<br>
 Well, it will throw an error 💥. That's why I **highly** recommend to create a [`500.tsx` page](https://nextjs.org/docs/advanced-features/custom-error-page#500-page) and wrap your app in an [Error Boundary](https://reactjs.org/docs/error-boundaries.html).
 
-![](https://github.com/zoontek/next-type-router/blob/main/docs/screenshot.png?raw=true)
+![](https://github.com/zoontek/next-type-routes/blob/main/docs/screenshot.png?raw=true)

@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { useRouterWithSSR } from "../../../../router";
+import { useRouterWithSSR } from "../../../../routes";
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async () => {

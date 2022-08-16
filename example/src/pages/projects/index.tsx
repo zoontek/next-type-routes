@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PROJECTS_DATA } from "../../data";
-import { createURL } from "../../router";
+import { createURL } from "../../routes";
 
 export default function ProjectsPage() {
   return (

@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { USERS_DATA } from "../../../../data";
-import { createURL, useRouterWithSSR } from "../../../../router";
+import { createURL, useRouterWithSSR } from "../../../../routes";
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async () => {

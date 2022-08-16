@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import Link from "next/link";
 import "../main.css";
-import { createURL } from "../router";
+import { createURL } from "../routes";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (

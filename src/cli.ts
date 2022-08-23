@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import pc from "picocolors";
 import pkgDir from "pkg-dir";
+import ts from "typescript";
 
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
@@ -22,6 +23,8 @@ const getFilesRecursive = (dir: string): string[] => {
     .flat();
 };
 
+// const getTypescriptTarget = () => {};
+
 const getRouteFiles = (pagesDir: string) =>
   getFilesRecursive(pagesDir)
     .map((file) => path.parse(path.relative(pagesDir, file)))
@@ -30,6 +33,11 @@ const getRouteFiles = (pagesDir: string) =>
         [".ts", ".tsx", ".js", ".jsx", ".mjs"].includes(file.ext) &&
         !["404", "500", "_app", "_document", "_error"].includes(file.name),
     );
+
+// const isImportDeclaration = (
+//   statement: Statement,
+// ): statement is ImportDeclaration =>
+//   statement.kind === ts.SyntaxKind.ImportDeclaration;
 
 const isApiRouteFile = (parsedPath: path.ParsedPath) =>
   parsedPath.dir === "api" || parsedPath.dir.startsWith("api/");
@@ -49,7 +57,49 @@ const generateFile = async (filePath: string) => {
 
   const files = getRouteFiles(pagesDir);
   const apiFiles = files.filter((file) => isApiRouteFile(file));
-  const pageFiles = files.filter((file) => !isApiRouteFile(file));
+  // const pageFiles = files.filter((file) => !isApiRouteFile(file));
+
+  console.log(apiFiles);
+
+  const apiFilesAst = apiFiles.map((file) => {
+    const ast = ts.createSourceFile(
+      "x.ts",
+      fs.readFileSync(path.join(pagesDir, file.dir, file.base), "utf-8"),
+      ts.ScriptTarget.Latest,
+    );
+
+    const { statements } = ast;
+
+    const importDeclaration = statements
+      .filter(ts.isImportDeclaration)
+      .find(
+        ({ moduleSpecifier }) =>
+          ts.isStringLiteral(moduleSpecifier) &&
+          moduleSpecifier.text === "next",
+      );
+
+    console.log(importDeclaration);
+
+    // .map((dec) => ({
+    //   // text: dec.moduleSpecifier.getText(),
+    //   fullText: dec.moduleSpecifier,
+    // }));
+
+    // const hasLibraryImport = importDeclarations.find(
+    //   (importDeclaration) =>
+    //     importDeclaration.moduleSpecifier.getText() === "next",
+    // );
+
+    fs.writeFileSync(
+      path.join(rootDir, file.name + ".json"),
+      JSON.stringify(importDeclaration, null, 2),
+      "utf-8",
+    );
+
+    return ast;
+  });
+
+  apiFilesAst;
 
   const routes = files
     .map((file) => {

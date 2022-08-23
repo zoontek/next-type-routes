@@ -7,6 +7,9 @@ import pc from "picocolors";
 import pkgDir from "pkg-dir";
 import ts from "typescript";
 
+const SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
+const IGNORED_FILES = ["_app", "_document", "_error", "_layout", "404", "500"];
+
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -23,21 +26,14 @@ const getFilesRecursive = (dir: string): string[] => {
     .flat();
 };
 
-// const getTypescriptTarget = () => {};
-
 const getRouteFiles = (pagesDir: string) =>
   getFilesRecursive(pagesDir)
     .map((file) => path.parse(path.relative(pagesDir, file)))
     .filter(
       (file) =>
-        [".ts", ".tsx", ".js", ".jsx", ".mjs"].includes(file.ext) &&
-        !["404", "500", "_app", "_document", "_error"].includes(file.name),
+        SUPPORTED_EXTENSIONS.includes(file.ext) &&
+        !IGNORED_FILES.includes(file.name),
     );
-
-// const isImportDeclaration = (
-//   statement: Statement,
-// ): statement is ImportDeclaration =>
-//   statement.kind === ts.SyntaxKind.ImportDeclaration;
 
 const isApiRouteFile = (parsedPath: path.ParsedPath) =>
   parsedPath.dir === "api" || parsedPath.dir.startsWith("api/");

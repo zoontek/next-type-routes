@@ -8,7 +8,7 @@ import pkgDir from "pkg-dir";
 import ts from "typescript";
 
 const SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
-const IGNORED_FILES = ["_app", "_document", "_error", "_layout", "404", "500"];
+const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
 
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });

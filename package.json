@@ -45,19 +45,19 @@
     "trailingComma": "all"
   },
   "peerDependencies": {
-    "next": ">=12.2.5",
+    "next": ">=12.2.0",
     "react": ">=18.0.0",
     "typescript": ">=4.7.0"
   },
   "devDependencies": {
-    "@types/node": "^18.7.6",
+    "@types/node": "^18.7.13",
     "commander": "^9.4.0",
     "next": ">=12.2.0",
     "pkg-dir": "^5.0.0",
     "prettier": "^2.7.1",
     "tsd": "^0.22.0",
-    "type-fest": "^2.18.0",
-    "typescript": "^4.7.4",
-    "vitest": "^0.22.0"
+    "type-fest": "^2.19.0",
+    "typescript": "^4.8.2",
+    "vitest": "^0.22.1"
   }
 }

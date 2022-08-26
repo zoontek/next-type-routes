@@ -166,10 +166,15 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.2.tgz#ee771e2ba4b3dc5b372935d549fd9617bf345b8c"
   integrity sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==
 
-"@types/node@*", "@types/node@^18.7.6":
+"@types/node@*":
   version "18.7.6"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.6.tgz#31743bc5772b6ac223845e18c3fc26f042713c83"
   integrity sha512-EdxgKRXgYsNITy5mjjXjVE/CS8YENSdhiagGrLqjG0pvA2owgJ6i4l7wy/PFZGC0B1/H20lWKN7ONVDNYDZm7A==
+
+"@types/node@^18.7.13":
+  version "18.7.13"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.13.tgz#23e6c5168333480d454243378b69e861ab5c011a"
+  integrity sha512-46yIhxSe5xEaJZXWdIBP7GU4HDTG8/eo0qd9atdiL+lFpA03y8KS+lkTN834TWJj5767GbWv4n/P6efyTFt1Dw==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -1127,10 +1132,10 @@ tinypool@^0.2.4:
   resolved "https://registry.yarnpkg.com/tinypool/-/tinypool-0.2.4.tgz#4d2598c4689d1a2ce267ddf3360a9c6b3925a20c"
   integrity sha512-Vs3rhkUH6Qq1t5bqtb816oT+HeJTXfwt2cbPH17sWHIYKTotQIFPk3tf2fgqRrVyMDVOc1EnPgzIxfIulXVzwQ==
 
-tinyspy@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-1.0.0.tgz#0cb34587287b0432b33fe36a9bd945fe22b1eb89"
-  integrity sha512-FI5B2QdODQYDRjfuLF+OrJ8bjWRMCXokQPcwKm0W3IzcbUmBNv536cQc7eXGoAuXphZwgx1DFbqImwzz08Fnhw==
+tinyspy@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-1.0.2.tgz#6da0b3918bfd56170fb3cd3a2b5ef832ee1dff0d"
+  integrity sha512-bSGlgwLBYf7PnUsQ6WOc6SJ3pGOcd+d8AA6EUnLDDM0kWEstC1JIlSZA3UNliDXhd9ABoS7hiRBDCu+XP/sf1Q==
 
 to-regex-range@^5.0.1:
   version "5.0.1"
@@ -1186,15 +1191,15 @@ type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
-type-fest@^2.18.0:
-  version "2.18.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.18.0.tgz#fdef3a74e0a9e68ebe46054836650fb91ac3881e"
-  integrity sha512-pRS+/yrW5TjPPHNOvxhbNZexr2bS63WjrMU8a+VzEBhUi9Tz1pZeD+vQz3ut0svZ46P+SRqMEPnJmk2XnvNzTw==
+type-fest@^2.19.0:
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
+  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
-typescript@^4.7.4:
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
-  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
+typescript@^4.8.2:
+  version "4.8.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.8.2.tgz#e3b33d5ccfb5914e4eeab6699cf208adee3fd790"
+  integrity sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw==
 
 use-sync-external-store@1.2.0:
   version "1.2.0"
@@ -1221,10 +1226,10 @@ validate-npm-package-license@^3.0.1:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vitest@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.22.0.tgz#175622a04af77c48967da3b798d53420ad463670"
-  integrity sha512-BSIro/QOHLaQY08FHwT6THWhqLQ+VPU+N4Rdo4pcP+16XB6oLmNNAXGcSh/MOLUhfUy+mqCwx7AyKmU7Ms5R+g==
+vitest@^0.22.1:
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.22.1.tgz#3122e6024bf782ee9aca53034017af7adb009c32"
+  integrity sha512-+x28YTnSLth4KbXg7MCzoDAzPJlJex7YgiZbUh6YLp0/4PqVZ7q7/zyfdL0OaPtKTpNiQFPpMC8Y2MSzk8F7dw==
   dependencies:
     "@types/chai" "^4.3.3"
     "@types/chai-subset" "^1.3.3"
@@ -1233,7 +1238,7 @@ vitest@^0.22.0:
     debug "^4.3.4"
     local-pkg "^0.4.2"
     tinypool "^0.2.4"
-    tinyspy "^1.0.0"
+    tinyspy "^1.0.2"
     vite "^2.9.12 || ^3.0.0-0"
 
 yallist@^4.0.0:

@@ -3,16 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "type-routes": "type-routes src/routes.ts",
+    "type-routes": "node node_modules/next-type-routes/dist/cli src/routes.ts",
     "dev": "yarn type-routes && next dev",
     "build": "yarn type-routes && next build",
-    "start": "next start",
-    "preinstall": "cd .. && yarn build && cd example",
-    "reinstall": "rm -rf ./node_modules && yarn && yarn type-routes"
+    "start": "next start"
   },
   "dependencies": {
     "next": "12.2.5",
-    "next-type-routes": "file:../",
+    "next-type-routes": "link:../",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

@@ -116,11 +116,6 @@ const generateFile = async (filePath: string) => {
       } else {
         importDeclaration.addNamedImports([getRouteAlias]);
       }
-    } else {
-      sourceFile.addImportDeclaration({
-        moduleSpecifier: "next-type-routes",
-        namedImports: [getRouteAlias],
-      });
     }
 
     const routeVariable = variableDeclarations.find((declaration) => {
@@ -136,17 +131,22 @@ const generateFile = async (filePath: string) => {
     if (routeVariable != null) {
       routeVariable.setInitializer(`${getRouteAlias}<"${routePath}">()`);
     } else {
-      const lastImportIndex = last(importDeclarations)?.getChildIndex();
-
-      const index =
-        (lastImportIndex != null ? lastImportIndex + 1 : 0) +
-        (importDeclaration == null ? 1 : 0);
+      const lastImport = last(importDeclarations);
+      const index = lastImport != null ? lastImport.getChildIndex() + 1 : 0;
 
       sourceFile.insertVariableStatement(index, {
         declarationKind: VariableDeclarationKind.Const,
         declarations: [
           { name: "route", initializer: `${getRouteAlias}<"${routePath}">()` },
         ],
+      });
+    }
+
+    // We add the import at the end to avoid messing with indexes
+    if (importDeclaration == null) {
+      sourceFile.addImportDeclaration({
+        namedImports: [getRouteAlias],
+        moduleSpecifier: "next-type-routes",
       });
     }
 

@@ -140,15 +140,12 @@ const generateFile = async (filePath: string) => {
 
       const index =
         (lastImportIndex != null ? lastImportIndex + 1 : 0) +
-        (importDeclaration != null ? 0 : 1);
+        (importDeclaration == null ? 1 : 0);
 
       sourceFile.insertVariableStatement(index, {
         declarationKind: VariableDeclarationKind.Const,
         declarations: [
-          {
-            name: "route",
-            initializer: `${getRouteAlias}<"${routePath}">()`,
-          },
+          { name: "route", initializer: `${getRouteAlias}<"${routePath}">()` },
         ],
       });
     }

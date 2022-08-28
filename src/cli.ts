@@ -5,10 +5,18 @@ import fs from "fs";
 import path from "path";
 import pc from "picocolors";
 import pkgDir from "pkg-dir";
-import { Project, ScriptTarget } from "ts-morph";
+import {
+  Project,
+  ScriptTarget,
+  SyntaxKind,
+  VariableDeclarationKind,
+} from "ts-morph";
 
 const SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
 const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
+
+// TODO: use that for [...slug]
+export type NonEmptyArray<T> = [T, ...T[]];
 
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
@@ -35,6 +43,10 @@ const getRouteFiles = (pagesDir: string) =>
         !IGNORED_FILES.includes(file.name),
     );
 
+// Get router path from relative path
+const getRouterPath = ({ dir, name }: path.ParsedPath) =>
+  `/${dir}${name === "index" ? "" : `/${name}`}`;
+
 const generateFile = async (filePath: string) => {
   const rootDir = pkgDir.sync() ?? process.cwd();
 
@@ -47,18 +59,6 @@ const generateFile = async (filePath: string) => {
     console.log(pc.red("No pages directory detected! Skip routes generation…"));
     process.exit(1);
   }
-
-  // TODO: use reduce?
-  // const files = getRouteFiles(pagesDir).map((file) => {
-  //   const relativePath = path.join(file.dir, file.base);
-
-  //   return {
-  //     ...file,
-  //     absolutePath: path.join(pagesDir, relativePath),
-  //     relativePath,
-  //     isApiFile: relativePath.startsWith("api/"),
-  //   };
-  // });
 
   const fileParsedPaths = getRouteFiles(pagesDir);
 
@@ -79,9 +79,42 @@ const generateFile = async (filePath: string) => {
     sourceFiles.map(async (sourceFile) => {
       const filePath = sourceFile.getFilePath();
       const relativePath = path.relative(pagesDir, filePath);
+      const routerPath = getRouterPath(path.parse(relativePath));
       const isApiFile = relativePath.startsWith("api/");
 
-      const importDeclaration = sourceFile.getImportDeclaration(
+      const importDeclarations = sourceFile.getImportDeclarations();
+      const variableDeclarations = sourceFile.getVariableDeclarations();
+
+      const routeVariable = variableDeclarations.find((declaration) => {
+        const initializer = declaration.getInitializer();
+
+        return (
+          initializer != null &&
+          initializer.isKind(SyntaxKind.CallExpression) &&
+          initializer.getExpression().getText() === "getRoute"
+        );
+      });
+
+      if (routeVariable != null) {
+        routeVariable.setInitializer(`getRoute<"${routerPath}">()`);
+      } else {
+        const lastImportDeclaration =
+          importDeclarations[importDeclarations.length - 1];
+
+        sourceFile.insertVariableStatement(
+          lastImportDeclaration != null
+            ? lastImportDeclaration.getChildIndex() + 1
+            : 0,
+          {
+            declarationKind: VariableDeclarationKind.Const,
+            declarations: [
+              { name: "route", initializer: `getRoute<"${routerPath}">()` },
+            ],
+          },
+        );
+      }
+
+      const importDeclaration = importDeclarations.find(
         (declaration) =>
           declaration.getModuleSpecifier().getLiteralText() ===
           "next-type-routes",
@@ -95,19 +128,22 @@ const generateFile = async (filePath: string) => {
           importDeclaration.removeNamespaceImport();
         }
 
-        const namedImports = importDeclaration.getNamedImports();
-        const importNames = namedImports.map((item) => item.getName());
+        const getRouteImport = importDeclaration
+          .getNamedImports()
+          .find((namedImport) => namedImport.getName() === "getRoute");
 
-        const hasGetRouteImport =
-          importNames.find((item) => item === "getRoute") != null;
+        if (getRouteImport != null && getRouteImport.getAliasNode() != null) {
+          // TODO: log unsupported alias import
+          getRouteImport.removeAlias();
+        }
 
-        if (!hasGetRouteImport) {
+        if (getRouteImport == null) {
           importDeclaration.addNamedImports(["getRoute"]);
         }
       } else {
         sourceFile.addImportDeclaration({
-          moduleSpecifier: "next-type-router",
           namedImports: ["getRoute"],
+          moduleSpecifier: "next-type-routes",
         });
       }
 
@@ -215,15 +251,7 @@ const generateFile = async (filePath: string) => {
   // pageFilesAst;
 
   const routes = fileParsedPaths
-    .map((file) => {
-      if (file.dir === "" && file.name === "index") {
-        return "/";
-      }
-      return (
-        (file.dir !== "" ? "/" + file.dir : "") +
-        (file.name !== "index" ? "/" + file.name : "")
-      );
-    })
+    .map(getRouterPath)
     .sort()
     .map((file) => `"${file}"`)
     .join(",\n  ");

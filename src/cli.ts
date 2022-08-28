@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import pc from "picocolors";
 import pkgDir from "pkg-dir";
-import ts from "typescript";
+import { Project, ScriptTarget } from "ts-morph";
 
 const SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
 const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
@@ -35,9 +35,6 @@ const getRouteFiles = (pagesDir: string) =>
         !IGNORED_FILES.includes(file.name),
     );
 
-const isApiRouteFile = (parsedPath: path.ParsedPath) =>
-  parsedPath.dir === "api" || parsedPath.dir.startsWith("api/");
-
 const generateFile = async (filePath: string) => {
   const rootDir = pkgDir.sync() ?? process.cwd();
 
@@ -51,53 +48,173 @@ const generateFile = async (filePath: string) => {
     process.exit(1);
   }
 
-  const files = getRouteFiles(pagesDir);
-  const apiFiles = files.filter((file) => isApiRouteFile(file));
-  // const pageFiles = files.filter((file) => !isApiRouteFile(file));
+  // TODO: use reduce?
+  // const files = getRouteFiles(pagesDir).map((file) => {
+  //   const relativePath = path.join(file.dir, file.base);
 
-  console.log(apiFiles);
+  //   return {
+  //     ...file,
+  //     absolutePath: path.join(pagesDir, relativePath),
+  //     relativePath,
+  //     isApiFile: relativePath.startsWith("api/"),
+  //   };
+  // });
 
-  const apiFilesAst = apiFiles.map((file) => {
-    const ast = ts.createSourceFile(
-      "x.ts",
-      fs.readFileSync(path.join(pagesDir, file.dir, file.base), "utf-8"),
-      ts.ScriptTarget.Latest,
-    );
+  const fileParsedPaths = getRouteFiles(pagesDir);
 
-    const { statements } = ast;
+  const files = fileParsedPaths.map((file) =>
+    path.join(pagesDir, file.dir, file.base),
+  );
 
-    const importDeclaration = statements
-      .filter(ts.isImportDeclaration)
-      .find(
-        ({ moduleSpecifier }) =>
-          ts.isStringLiteral(moduleSpecifier) &&
-          moduleSpecifier.text === "next",
-      );
-
-    console.log(importDeclaration);
-
-    // .map((dec) => ({
-    //   // text: dec.moduleSpecifier.getText(),
-    //   fullText: dec.moduleSpecifier,
-    // }));
-
-    // const hasLibraryImport = importDeclarations.find(
-    //   (importDeclaration) =>
-    //     importDeclaration.moduleSpecifier.getText() === "next",
-    // );
-
-    fs.writeFileSync(
-      path.join(rootDir, file.name + ".json"),
-      JSON.stringify(importDeclaration, null, 2),
-      "utf-8",
-    );
-
-    return ast;
+  const project = new Project({
+    compilerOptions: {
+      target: ScriptTarget.Latest,
+      // tsConfigFilePath: "path/to/tsconfig.json",
+    },
   });
 
-  apiFilesAst;
+  const sourceFiles = project.addSourceFilesAtPaths(files);
 
-  const routes = files
+  await Promise.all(
+    sourceFiles.map(async (sourceFile) => {
+      const filePath = sourceFile.getFilePath();
+      const relativePath = path.relative(pagesDir, filePath);
+      const isApiFile = relativePath.startsWith("api/");
+
+      const importDeclaration = sourceFile.getImportDeclaration(
+        (declaration) =>
+          declaration.getModuleSpecifier().getLiteralText() ===
+          "next-type-routes",
+      );
+
+      if (importDeclaration != null) {
+        const namespaceImport = importDeclaration.getNamespaceImport();
+
+        if (namespaceImport != null) {
+          // TODO: log unsupported namespace imports
+          importDeclaration.removeNamespaceImport();
+        }
+
+        const namedImports = importDeclaration.getNamedImports();
+        const importNames = namedImports.map((item) => item.getName());
+
+        const hasGetRouteImport =
+          importNames.find((item) => item === "getRoute") != null;
+
+        if (!hasGetRouteImport) {
+          importDeclaration.addNamedImports(["getRoute"]);
+        }
+      } else {
+        sourceFile.addImportDeclaration({
+          moduleSpecifier: "next-type-router",
+          namedImports: ["getRoute"],
+        });
+      }
+
+      return sourceFile.save();
+    }),
+  );
+
+  await project.save();
+
+  // const pageFilesAst = pageFiles.map((file) => {
+  //   const fileContent = fs.readFileSync(
+  //     path.join(pagesDir, file.dir, file.base),
+  //     "utf-8",
+  //   );
+
+  //   const { statements } = ast;
+  //   const importDeclarations = statements.filter(ts.isImportDeclaration);
+  //   const variableDeclarations = statements.filter(ts.isVariableStatement);
+
+  //   const importDeclaration = importDeclarations.find(
+  //     ({ moduleSpecifier }) =>
+  //       ts.isStringLiteral(moduleSpecifier) &&
+  //       moduleSpecifier.text === "next-type-routes",
+  //   );
+
+  //   if (!importDeclaration) {
+  //     const getRouteIdentifier = ts.factory.createIdentifier("getRoute");
+  //     const libNameIdentifier =
+  //       ts.factory.createStringLiteral("next-type-routes");
+
+  //     const importSpecifier = ts.factory.createImportSpecifier(
+  //       false,
+  //       getRouteIdentifier,
+  //       getRouteIdentifier,
+  //     );
+
+  //     const namedImports = ts.factory.createNamedImports([importSpecifier]);
+
+  //     const importClause = ts.factory.createImportClause(
+  //       false,
+  //       undefined,
+  //       namedImports,
+  //     );
+
+  //     const x = ts.factory.createImportDeclaration(
+  //       undefined,
+  //       importClause,
+  //       libNameIdentifier,
+  //     );
+  //   }
+
+  //   const namedBindings = importDeclaration?.importClause?.namedBindings;
+  //   const hasNamedBindings = namedBindings != null;
+
+  //   if (hasNamedBindings && ts.isNamespaceImport(namedBindings)) {
+  //     console.log(pc.red("next-type-routes namespace import is not supported"));
+  //     process.exit(1);
+  //   }
+
+  //   if (!hasNamedBindings) {
+  //     // const x = ts.factory.create;
+  //   }
+
+  //   const hasGetRouteImport =
+  //     hasNamedBindings &&
+  //     ts.isNamedImports(namedBindings) &&
+  //     namedBindings.elements.find((element) => element);
+
+  //   hasGetRouteImport;
+
+  //   variableDeclarations
+  //     .map(({ declarationList }) => declarationList.declarations)
+  //     .flat()
+  //     .filter(
+  //       ({ initializer }) =>
+  //         initializer != null && ts.isCallExpression(initializer),
+  //     );
+
+  //   // const {} = getRoute<"/">()
+
+  //   // export const getServerSideProps = async () => {}
+  //   // export async function getServerSideProps() {}
+
+  //   // const cake = variableDeclarations.filter((dec) => dec.initializer != null && dec.initializer.);
+
+  //   // .map((dec) => ({
+  //   //   // text: dec.moduleSpecifier.getText(),
+  //   //   fullText: dec.moduleSpecifier,
+  //   // }));
+
+  //   // const hasLibraryImport = importDeclarations.find(
+  //   //   (importDeclaration) =>
+  //   //     importDeclaration.moduleSpecifier.getText() === "next",
+  //   // );
+
+  //   // fs.writeFileSync(
+  //   //   path.join(rootDir, file.name + ".json"),
+  //   //   JSON.stringify(importDeclaration, null, 2),
+  //   //   "utf-8",
+  //   // );
+
+  //   return ast;
+  // });
+
+  // pageFilesAst;
+
+  const routes = fileParsedPaths
     .map((file) => {
       if (file.dir === "" && file.name === "index") {
         return "/";

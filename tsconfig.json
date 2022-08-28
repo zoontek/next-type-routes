@@ -24,7 +24,6 @@
     // Emit
     "declaration": true,
     "esModuleInterop": true,
-    "noEmitOnError": true,
     "sourceMap": true,
     "stripInternal": true,
 

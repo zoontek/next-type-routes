@@ -82,8 +82,8 @@ const generateFile = async (filePath: string) => {
       const routerPath = getRouterPath(path.parse(relativePath));
       const isApiFile = relativePath.startsWith("api/");
 
-      const importDeclarations = sourceFile.getImportDeclarations();
       const variableDeclarations = sourceFile.getVariableDeclarations();
+      const importDeclarations = sourceFile.getImportDeclarations();
 
       const routeVariable = variableDeclarations.find((declaration) => {
         const initializer = declaration.getInitializer();

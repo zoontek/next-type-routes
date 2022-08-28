@@ -18,6 +18,8 @@ const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
 // TODO: use that for [...slug]
 export type NonEmptyArray<T> = [T, ...T[]];
 
+const last = <T>(array: T[]): T | undefined => array[array.length - 1];
+
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -44,7 +46,7 @@ const getRouteFiles = (pagesDir: string) =>
     );
 
 // Get router path from relative path
-const getRouterPath = ({ dir, name }: path.ParsedPath) =>
+const getRoutePath = ({ dir, name }: path.ParsedPath) =>
   `/${dir}${name === "index" ? "" : `/${name}`}`;
 
 const generateFile = async (filePath: string) => {
@@ -75,183 +77,89 @@ const generateFile = async (filePath: string) => {
 
   const sourceFiles = project.addSourceFilesAtPaths(files);
 
-  await Promise.all(
-    sourceFiles.map(async (sourceFile) => {
-      const filePath = sourceFile.getFilePath();
-      const relativePath = path.relative(pagesDir, filePath);
-      const routerPath = getRouterPath(path.parse(relativePath));
-      const isApiFile = relativePath.startsWith("api/");
+  sourceFiles.forEach((sourceFile) => {
+    const filePath = sourceFile.getFilePath();
+    const relativePath = path.relative(pagesDir, filePath);
+    const routePath = getRoutePath(path.parse(relativePath));
 
-      const variableDeclarations = sourceFile.getVariableDeclarations();
-      const importDeclarations = sourceFile.getImportDeclarations();
+    // const isApiFile = relativePath.startsWith("api/");
 
-      const routeVariable = variableDeclarations.find((declaration) => {
-        const initializer = declaration.getInitializer();
+    let getRouteAlias = "getRoute";
 
-        return (
-          initializer != null &&
-          initializer.isKind(SyntaxKind.CallExpression) &&
-          initializer.getExpression().getText() === "getRoute"
-        );
+    const variableDeclarations = sourceFile.getVariableDeclarations();
+    const importDeclarations = sourceFile.getImportDeclarations();
+
+    const importDeclaration = importDeclarations.find(
+      (declaration) =>
+        declaration.getModuleSpecifier().getLiteralText() ===
+        "next-type-routes",
+    );
+
+    if (importDeclaration != null) {
+      const namespaceImport = importDeclaration.getNamespaceImport();
+
+      if (namespaceImport != null) {
+        // TODO: log unsupported namespace imports
+        importDeclaration.removeNamespaceImport();
+      }
+
+      const getRouteImport = importDeclaration
+        .getNamedImports()
+        .find((namedImport) => namedImport.getName() === getRouteAlias);
+
+      if (getRouteImport != null) {
+        const alias = getRouteImport.getAliasNode();
+
+        if (alias != null) {
+          getRouteAlias = alias.getText();
+        }
+      } else {
+        importDeclaration.addNamedImports([getRouteAlias]);
+      }
+    } else {
+      sourceFile.addImportDeclaration({
+        moduleSpecifier: "next-type-routes",
+        namedImports: [getRouteAlias],
       });
+    }
 
-      if (routeVariable != null) {
-        routeVariable.setInitializer(`getRoute<"${routerPath}">()`);
-      } else {
-        const lastImportDeclaration =
-          importDeclarations[importDeclarations.length - 1];
+    const routeVariable = variableDeclarations.find((declaration) => {
+      const initializer = declaration.getInitializer();
 
-        sourceFile.insertVariableStatement(
-          lastImportDeclaration != null
-            ? lastImportDeclaration.getChildIndex() + 1
-            : 0,
-          {
-            declarationKind: VariableDeclarationKind.Const,
-            declarations: [
-              { name: "route", initializer: `getRoute<"${routerPath}">()` },
-            ],
-          },
-        );
-      }
-
-      const importDeclaration = importDeclarations.find(
-        (declaration) =>
-          declaration.getModuleSpecifier().getLiteralText() ===
-          "next-type-routes",
+      return (
+        initializer != null &&
+        initializer.isKind(SyntaxKind.CallExpression) &&
+        initializer.getExpression().getText() === getRouteAlias
       );
+    });
 
-      if (importDeclaration != null) {
-        const namespaceImport = importDeclaration.getNamespaceImport();
+    if (routeVariable != null) {
+      routeVariable.setInitializer(`${getRouteAlias}<"${routePath}">()`);
+    } else {
+      const lastImportIndex = last(importDeclarations)?.getChildIndex();
 
-        if (namespaceImport != null) {
-          // TODO: log unsupported namespace imports
-          importDeclaration.removeNamespaceImport();
-        }
+      const index =
+        (lastImportIndex != null ? lastImportIndex + 1 : 0) +
+        (importDeclaration != null ? 0 : 1);
 
-        const getRouteImport = importDeclaration
-          .getNamedImports()
-          .find((namedImport) => namedImport.getName() === "getRoute");
+      sourceFile.insertVariableStatement(index, {
+        declarationKind: VariableDeclarationKind.Const,
+        declarations: [
+          {
+            name: "route",
+            initializer: `${getRouteAlias}<"${routePath}">()`,
+          },
+        ],
+      });
+    }
 
-        if (getRouteImport != null && getRouteImport.getAliasNode() != null) {
-          // TODO: log unsupported alias import
-          getRouteImport.removeAlias();
-        }
-
-        if (getRouteImport == null) {
-          importDeclaration.addNamedImports(["getRoute"]);
-        }
-      } else {
-        sourceFile.addImportDeclaration({
-          namedImports: ["getRoute"],
-          moduleSpecifier: "next-type-routes",
-        });
-      }
-
-      return sourceFile.save();
-    }),
-  );
+    // return sourceFile.save();
+  });
 
   await project.save();
 
-  // const pageFilesAst = pageFiles.map((file) => {
-  //   const fileContent = fs.readFileSync(
-  //     path.join(pagesDir, file.dir, file.base),
-  //     "utf-8",
-  //   );
-
-  //   const { statements } = ast;
-  //   const importDeclarations = statements.filter(ts.isImportDeclaration);
-  //   const variableDeclarations = statements.filter(ts.isVariableStatement);
-
-  //   const importDeclaration = importDeclarations.find(
-  //     ({ moduleSpecifier }) =>
-  //       ts.isStringLiteral(moduleSpecifier) &&
-  //       moduleSpecifier.text === "next-type-routes",
-  //   );
-
-  //   if (!importDeclaration) {
-  //     const getRouteIdentifier = ts.factory.createIdentifier("getRoute");
-  //     const libNameIdentifier =
-  //       ts.factory.createStringLiteral("next-type-routes");
-
-  //     const importSpecifier = ts.factory.createImportSpecifier(
-  //       false,
-  //       getRouteIdentifier,
-  //       getRouteIdentifier,
-  //     );
-
-  //     const namedImports = ts.factory.createNamedImports([importSpecifier]);
-
-  //     const importClause = ts.factory.createImportClause(
-  //       false,
-  //       undefined,
-  //       namedImports,
-  //     );
-
-  //     const x = ts.factory.createImportDeclaration(
-  //       undefined,
-  //       importClause,
-  //       libNameIdentifier,
-  //     );
-  //   }
-
-  //   const namedBindings = importDeclaration?.importClause?.namedBindings;
-  //   const hasNamedBindings = namedBindings != null;
-
-  //   if (hasNamedBindings && ts.isNamespaceImport(namedBindings)) {
-  //     console.log(pc.red("next-type-routes namespace import is not supported"));
-  //     process.exit(1);
-  //   }
-
-  //   if (!hasNamedBindings) {
-  //     // const x = ts.factory.create;
-  //   }
-
-  //   const hasGetRouteImport =
-  //     hasNamedBindings &&
-  //     ts.isNamedImports(namedBindings) &&
-  //     namedBindings.elements.find((element) => element);
-
-  //   hasGetRouteImport;
-
-  //   variableDeclarations
-  //     .map(({ declarationList }) => declarationList.declarations)
-  //     .flat()
-  //     .filter(
-  //       ({ initializer }) =>
-  //         initializer != null && ts.isCallExpression(initializer),
-  //     );
-
-  //   // const {} = getRoute<"/">()
-
-  //   // export const getServerSideProps = async () => {}
-  //   // export async function getServerSideProps() {}
-
-  //   // const cake = variableDeclarations.filter((dec) => dec.initializer != null && dec.initializer.);
-
-  //   // .map((dec) => ({
-  //   //   // text: dec.moduleSpecifier.getText(),
-  //   //   fullText: dec.moduleSpecifier,
-  //   // }));
-
-  //   // const hasLibraryImport = importDeclarations.find(
-  //   //   (importDeclaration) =>
-  //   //     importDeclaration.moduleSpecifier.getText() === "next",
-  //   // );
-
-  //   // fs.writeFileSync(
-  //   //   path.join(rootDir, file.name + ".json"),
-  //   //   JSON.stringify(importDeclaration, null, 2),
-  //   //   "utf-8",
-  //   // );
-
-  //   return ast;
-  // });
-
-  // pageFilesAst;
-
   const routes = fileParsedPaths
-    .map(getRouterPath)
+    .map(getRoutePath)
     .sort()
     .map((file) => `"${file}"`)
     .join(",\n  ");

@@ -69,25 +69,22 @@ const generateFile = async (filePath: string) => {
   );
 
   const project = new Project({
-    compilerOptions: {
-      target: ScriptTarget.Latest,
-      // tsConfigFilePath: "path/to/tsconfig.json",
-    },
+    compilerOptions: { target: ScriptTarget.Latest },
   });
 
   const sourceFiles = project.addSourceFilesAtPaths(files);
+  // const isApiFile = relativePath.startsWith("api/");
 
   sourceFiles.forEach((sourceFile) => {
     const filePath = sourceFile.getFilePath();
     const relativePath = path.relative(pagesDir, filePath);
     const routePath = getRoutePath(path.parse(relativePath));
 
-    // const isApiFile = relativePath.startsWith("api/");
-
+    let moduleNamespaced = "";
     let getRouteAlias = "getRoute";
 
-    const variableDeclarations = sourceFile.getVariableDeclarations();
     const importDeclarations = sourceFile.getImportDeclarations();
+    const variableDeclarations = sourceFile.getVariableDeclarations();
 
     const importDeclaration = importDeclarations.find(
       (declaration) =>
@@ -99,22 +96,21 @@ const generateFile = async (filePath: string) => {
       const namespaceImport = importDeclaration.getNamespaceImport();
 
       if (namespaceImport != null) {
-        // TODO: log unsupported namespace imports
-        importDeclaration.removeNamespaceImport();
-      }
-
-      const getRouteImport = importDeclaration
-        .getNamedImports()
-        .find((namedImport) => namedImport.getName() === getRouteAlias);
-
-      if (getRouteImport != null) {
-        const alias = getRouteImport.getAliasNode();
-
-        if (alias != null) {
-          getRouteAlias = alias.getText();
-        }
+        moduleNamespaced = namespaceImport.getText() + ".";
       } else {
-        importDeclaration.addNamedImports([getRouteAlias]);
+        const getRouteImport = importDeclaration
+          .getNamedImports()
+          .find((namedImport) => namedImport.getName() === getRouteAlias);
+
+        if (getRouteImport != null) {
+          const alias = getRouteImport.getAliasNode();
+
+          if (alias != null) {
+            getRouteAlias = alias.getText();
+          }
+        } else {
+          importDeclaration.addNamedImports([getRouteAlias]);
+        }
       }
     }
 
@@ -124,12 +120,16 @@ const generateFile = async (filePath: string) => {
       return (
         initializer != null &&
         initializer.isKind(SyntaxKind.CallExpression) &&
-        initializer.getExpression().getText() === getRouteAlias
+        initializer.getExpression().getText() ===
+          moduleNamespaced + getRouteAlias
       );
     });
 
+    const routeVariableInitializer =
+      moduleNamespaced + getRouteAlias + `<"${routePath}">()`;
+
     if (routeVariable != null) {
-      routeVariable.setInitializer(`${getRouteAlias}<"${routePath}">()`);
+      routeVariable.setInitializer(routeVariableInitializer);
     } else {
       const lastImport = last(importDeclarations);
       const index = lastImport != null ? lastImport.getChildIndex() + 1 : 0;
@@ -137,7 +137,7 @@ const generateFile = async (filePath: string) => {
       sourceFile.insertVariableStatement(index, {
         declarationKind: VariableDeclarationKind.Const,
         declarations: [
-          { name: "route", initializer: `${getRouteAlias}<"${routePath}">()` },
+          { name: "route", initializer: routeVariableInitializer },
         ],
       });
     }

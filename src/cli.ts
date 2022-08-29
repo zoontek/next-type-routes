@@ -80,7 +80,7 @@ const generateFile = async (filePath: string) => {
     const relativePath = path.relative(pagesDir, filePath);
     const routePath = getRoutePath(path.parse(relativePath));
 
-    let moduleNamespaced = "";
+    let moduleNamespace = "";
     let getRouteAlias = "getRoute";
 
     const importDeclarations = sourceFile.getImportDeclarations();
@@ -96,7 +96,7 @@ const generateFile = async (filePath: string) => {
       const namespaceImport = importDeclaration.getNamespaceImport();
 
       if (namespaceImport != null) {
-        moduleNamespaced = namespaceImport.getText() + ".";
+        moduleNamespace = namespaceImport.getText() + ".";
       } else {
         const getRouteImport = importDeclaration
           .getNamedImports()
@@ -121,12 +121,12 @@ const generateFile = async (filePath: string) => {
         initializer != null &&
         initializer.isKind(SyntaxKind.CallExpression) &&
         initializer.getExpression().getText() ===
-          moduleNamespaced + getRouteAlias
+          moduleNamespace + getRouteAlias
       );
     });
 
     const routeVariableInitializer =
-      moduleNamespaced + getRouteAlias + `<"${routePath}">()`;
+      moduleNamespace + getRouteAlias + `<"${routePath}">()`;
 
     if (routeVariable != null) {
       routeVariable.setInitializer(routeVariableInitializer);

@@ -12,11 +12,12 @@ import {
   VariableDeclarationKind,
 } from "ts-morph";
 
+// USE THIS INTERNAL FUNCTION TO ADD BASE PATH -> NO, only basePath variable
+// import { addBasePath } from "next/dist/client/add-base-path";
+// const basePath = (process.env.__NEXT_ROUTER_BASEPATH as string) || "";
+
 const SUPPORTED_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
 const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
-
-// TODO: use that for [...slug]
-export type NonEmptyArray<T> = [T, ...T[]];
 
 const last = <T>(array: T[]): T | undefined => array[array.length - 1];
 

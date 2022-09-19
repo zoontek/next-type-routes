@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import fs from "fs";
+import prettier from "prettier";
 import path from "path";
 import pc from "picocolors";
 import pkgDir from "pkg-dir";
@@ -11,6 +12,9 @@ import {
   SyntaxKind,
   VariableDeclarationKind,
 } from "ts-morph";
+import { PARAM_TYPES } from "./constants";
+import { extractRoute } from "./extractRoute";
+import { RouteParamPart } from "./types";
 
 // USE THIS INTERNAL FUNCTION TO ADD BASE PATH -> NO, only basePath variable
 // import { addBasePath } from "next/dist/client/add-base-path";
@@ -21,8 +25,8 @@ const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
 
 const last = <T>(array: T[]): T | undefined => array[array.length - 1];
 
-const isApiRoutePath = (routePath: string) =>
-  routePath === "/api" || routePath.startsWith("/api/");
+const isApiRoute = (route: string) =>
+  route === "/api" || route.startsWith("/api/");
 
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
@@ -50,7 +54,7 @@ const getRouteFiles = (pagesDir: string) =>
     );
 
 // Get router path from relative path
-const getRoutePath = ({ dir, name }: path.ParsedPath) =>
+const getRouteFromPath = ({ dir, name }: path.ParsedPath) =>
   `/${dir}${name === "index" ? "" : `/${name}`}`;
 
 const main = async () => {
@@ -82,7 +86,7 @@ const main = async () => {
   sourceFiles.forEach((sourceFile) => {
     const filePath = sourceFile.getFilePath();
     const relativePath = path.relative(pagesDir, filePath);
-    const routePath = getRoutePath(path.parse(relativePath));
+    const route = getRouteFromPath(path.parse(relativePath));
 
     let moduleNamespace = "";
     let getRouteAlias = "getRoute";
@@ -130,7 +134,7 @@ const main = async () => {
     });
 
     const routeVariableInitializer =
-      moduleNamespace + getRouteAlias + `<"${routePath}">()`;
+      moduleNamespace + getRouteAlias + `<"${route}">()`;
 
     if (routeVariable != null) {
       routeVariable.setInitializer(routeVariableInitializer);
@@ -159,29 +163,102 @@ const main = async () => {
 
   await project.save();
 
-  const routePaths = fileParsedPaths.map(getRoutePath);
+  const allRoutes = fileParsedPaths.map(getRouteFromPath).sort();
+  const apiRoutes = allRoutes.filter(isApiRoute);
+  const routes = allRoutes.filter((route) => !isApiRoute(route));
 
-  const routes = routePaths
-    .filter((routePath) => !isApiRoutePath(routePath))
-    .sort()
-    .map((file) => `"${file}"`)
-    .join(",\n    ");
+  let importNonEmptyArray = false;
 
-  const apiRoutes = routePaths
-    .filter(isApiRoutePath)
-    .sort()
-    .map((file) => `"${file}"`)
-    .join(",\n    ");
+  const routesParams = routes.reduce<string[]>((acc, route) => {
+    const routeParamParts = extractRoute(route)
+      .routeParts.filter(
+        (routePart): routePart is RouteParamPart =>
+          typeof routePart !== "string",
+      )
+      .map((routePart) => {
+        switch (routePart.type) {
+          case PARAM_TYPES.OPTIONAL_CATCH_ALL:
+            return `"${routePart.name}": string[]`;
+          case PARAM_TYPES.CATCH_ALL: {
+            importNonEmptyArray = true;
+            return `"${routePart.name}": NonEmptyArray<string>`;
+          }
+          default:
+            return `"${routePart.name}": string`;
+        }
+      });
+
+    return [
+      ...acc,
+      `"${route}": ${
+        routeParamParts.length === 0
+          ? "undefined"
+          : `{ ${routeParamParts.join(",")} }`
+      }`,
+    ];
+  }, []);
+
+  const apiRouteParams = apiRoutes.reduce<string[]>((acc, route) => {
+    const routeParamParts = extractRoute(route)
+      .routeParts.filter(
+        (routePart): routePart is RouteParamPart =>
+          typeof routePart !== "string",
+      )
+      .map((routePart) => {
+        switch (routePart.type) {
+          case PARAM_TYPES.OPTIONAL_CATCH_ALL:
+            return `"${routePart.name}": string[]`;
+          case PARAM_TYPES.CATCH_ALL: {
+            importNonEmptyArray = true;
+            return `"${routePart.name}": NonEmptyArray<string>`;
+          }
+          default:
+            return `"${routePart.name}": string`;
+        }
+      });
+
+    return [
+      ...acc,
+      `"${route}": ${
+        routeParamParts.length === 0
+          ? "undefined"
+          : `{ ${routeParamParts.join(",")} }`
+      }`,
+    ];
+  }, []);
+
+  const start = importNonEmptyArray
+    ? `import { NonEmptyArray } from "./types";
+`
+    : "";
+
+  // export declare type Routes = [
+  //   ${routes.map((file) => `"${file}"`).join(",")}
+  // ];
+
+  // export declare type ApiRoutes = [
+  //   ${apiRoutes.map((file) => `"${file}"`).join(",")}
+  // ];
 
   fs.writeFileSync(
     path.resolve(__dirname, "userTypes.d.ts"),
-    `export declare type Routes = [
-    ${routes}
-];
-export declare type ApiRoutes = [
-    ${apiRoutes}
-];
+    prettier.format(
+      `${start}
+
+export declare type RoutesParams = {
+  ${routesParams.join(",")}
+};
+
+export declare type ApiRoutesParams = {
+  ${apiRouteParams.join(",")}
+};
 `,
+      {
+        parser: "typescript",
+        tabWidth: 4,
+        trailingComma: "none",
+      },
+    ),
     "utf8",
   );
 };

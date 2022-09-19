@@ -3,7 +3,7 @@ import type { ParsedUrlQuery, ParsedUrlQueryInput } from "querystring";
 import type { Except, Split, ValueOf } from "type-fest";
 import { PARAM_TYPES } from "./constants";
 
-export type NonEmptyStringArray = [string, ...string[]];
+export type NonEmptyArray<T> = [T, ...T[]];
 
 export type GetRouteParams<
   Route extends string,
@@ -12,15 +12,18 @@ export type GetRouteParams<
   ? Head extends `[[...${infer Name}]]`
     ? { [K in Name]?: string[] | undefined } & GetRouteParams<Route, Tail>
     : Head extends `[...${infer Name}]`
-    ? { [K in Name]: NonEmptyStringArray } & GetRouteParams<Route, Tail>
+    ? { [K in Name]: NonEmptyArray<string> } & GetRouteParams<Route, Tail>
     : Head extends `[${infer Name}]`
     ? { [K in Name]: string } & GetRouteParams<Route, Tail>
     : GetRouteParams<Route, Tail>
   : {};
 
-export type RouteParts = Array<
-  string | { name: string; type: ValueOf<typeof PARAM_TYPES> }
->;
+export type RouteParamPart = {
+  name: string;
+  type: ValueOf<typeof PARAM_TYPES>;
+};
+
+export type RouteParts = (string | RouteParamPart)[];
 
 type EmptyRecord = Record<string | number | symbol, never>;
 

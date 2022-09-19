@@ -163,13 +163,14 @@ const main = async () => {
 
   await project.save();
 
-  const allRoutes = fileParsedPaths.map(getRouteFromPath).sort();
-  const apiRoutes = allRoutes.filter(isApiRoute);
-  const routes = allRoutes.filter((route) => !isApiRoute(route));
+  const routes = fileParsedPaths.map(getRouteFromPath).sort();
+  const pageRoutes = routes.filter((route) => !isApiRoute(route));
+  const apiRoutes = routes.filter(isApiRoute);
 
   let importNonEmptyArray = false;
 
-  const routesParams = routes.reduce<string[]>((acc, route) => {
+  // TODO: Factorize these two
+  const pageRoutesParams = pageRoutes.reduce<string[]>((acc, route) => {
     const routeParamParts = extractRoute(route)
       .routeParts.filter(
         (routePart): routePart is RouteParamPart =>
@@ -193,7 +194,8 @@ const main = async () => {
       `"${route}": ${
         routeParamParts.length === 0
           ? "undefined"
-          : `{ ${routeParamParts.join(",")} }`
+          : `{
+  ${routeParamParts.join(",")} }`
       }`,
     ];
   }, []);
@@ -222,7 +224,8 @@ const main = async () => {
       `"${route}": ${
         routeParamParts.length === 0
           ? "undefined"
-          : `{ ${routeParamParts.join(",")} }`
+          : `{
+  ${routeParamParts.join(",")} }`
       }`,
     ];
   }, []);
@@ -245,13 +248,18 @@ const main = async () => {
     prettier.format(
       `${start}
 
-export declare type RoutesParams = {
-  ${routesParams.join(",")}
-};
-
 export declare type ApiRoutesParams = {
   ${apiRouteParams.join(",")}
 };
+
+export declare type PageRoutesParams = {
+  ${pageRoutesParams.join(",")}
+};
+
+export declare type RoutesParams = ApiRoutesParams & PageRoutesParams;
+export declare type ApiRoute = keyof ApiRoutesParams;
+export declare type PageRoute = keyof PageRoutesParams;
+export declare type Route = ApiRoute | PageRoute;
 `,
       {
         parser: "typescript",

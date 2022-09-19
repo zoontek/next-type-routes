@@ -5,14 +5,14 @@ import { createURL } from "./createURL";
 import { extractRoute } from "./extractRoute";
 import { matchRoute } from "./matchRoute";
 import { queryToParams } from "./queryToParams";
-import type { ExtractRouteParams, Params, ParamsArgs, Router } from "./types";
+import type { GetRouteParams, Params, ParamsArgs, Router } from "./types";
 
 const getError = (fn: string, input: string, route: string) =>
   new Error(`${fn} error: "${input}" does not match "${route}"`);
 
 export const createTypedFns = <Route extends string>(routes: Route[]) => {
   type RouteParams = Simplify<{
-    [K in Route]: ExtractRouteParams<K>;
+    [K in Route]: GetRouteParams<K>;
   }>;
   type ApiRoute = keyof {
     [K in Route as K extends "/api" | `/api/${string}` ? K : never]: K;

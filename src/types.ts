@@ -5,17 +5,17 @@ import { PARAM_TYPES } from "./constants";
 
 export type NonEmptyStringArray = [string, ...string[]];
 
-export type ExtractRouteParams<
+export type GetRouteParams<
   Route extends string,
   Items = Split<Route, "/">,
 > = Items extends [infer Head, ...infer Tail]
   ? Head extends `[[...${infer Name}]]`
-    ? { [K in Name]?: string[] | undefined } & ExtractRouteParams<Route, Tail>
+    ? { [K in Name]?: string[] | undefined } & GetRouteParams<Route, Tail>
     : Head extends `[...${infer Name}]`
-    ? { [K in Name]: NonEmptyStringArray } & ExtractRouteParams<Route, Tail>
+    ? { [K in Name]: NonEmptyStringArray } & GetRouteParams<Route, Tail>
     : Head extends `[${infer Name}]`
-    ? { [K in Name]: string } & ExtractRouteParams<Route, Tail>
-    : ExtractRouteParams<Route, Tail>
+    ? { [K in Name]: string } & GetRouteParams<Route, Tail>
+    : GetRouteParams<Route, Tail>
   : {};
 
 export type RouteParts = Array<

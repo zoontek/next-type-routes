@@ -21,6 +21,9 @@ const IGNORED_FILES = ["404", "500", "_app", "_document", "_error"];
 
 const last = <T>(array: T[]): T | undefined => array[array.length - 1];
 
+const isApiRoutePath = (routePath: string) =>
+  routePath === "/api" || routePath.startsWith("/api/");
+
 const getFilesRecursive = (dir: string): string[] => {
   const dirents = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -156,25 +159,28 @@ const generateFile = async (filePath: string) => {
 
   await project.save();
 
-  const routes = fileParsedPaths
-    .map(getRoutePath)
+  const routePaths = fileParsedPaths.map(getRoutePath);
+
+  const routes = routePaths
+    .filter((routePath) => !isApiRoutePath(routePath))
     .sort()
     .map((file) => `"${file}"`)
-    .join(",\n  ");
+    .join(",\n    ");
 
-  await fs.writeFileSync(
-    path.resolve(rootDir, filePath),
-    `import { createTypedFns } from "next-type-routes";
+  const apiRoutes = routePaths
+    .filter(isApiRoutePath)
+    .sort()
+    .map((file) => `"${file}"`)
+    .join(",\n    ");
 
-export const {
-  createURL,
-  getApiRequestParams,
-  getServerSideParams,
-  useRouterWithSSR,
-  useRouterWithNoSSR,
-} = createTypedFns([
-  ${routes},
-]);
+  fs.writeFileSync(
+    path.resolve(__dirname, "userTypes.d.ts"),
+    `export declare type Routes = [
+    ${routes}
+];
+export declare type ApiRoutes = [
+    ${apiRoutes}
+];
 `,
     "utf8",
   );
@@ -186,6 +192,6 @@ program
   .command("generate", { isDefault: true })
   .argument("<filePath>", "file path")
   .description("generate the routes file")
-  .action((arg: string) => generateFile(arg));
+  .action((arg: string) => generateFile(arg)); // TODO: Remove the need for an argument
 
 program.parse(process.argv);

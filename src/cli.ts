@@ -200,6 +200,8 @@ const main = async () => {
     ];
   }, []);
 
+  // TODO: Correctly type useRouter, getServerSideParams etc
+  // Don't expose getServerSideParams if getServerSideProps is not used
   const apiRouteParams = apiRoutes.reduce<string[]>((acc, route) => {
     const routeParamParts = extractRoute(route)
       .routeParts.filter(
@@ -244,9 +246,10 @@ const main = async () => {
   // ];
 
   fs.writeFileSync(
-    path.resolve(__dirname, "userTypes.d.ts"),
+    path.resolve(__dirname, "generated.d.ts"),
     prettier.format(
-      `${start}
+      `import { GetServerSidePropsContext, NextApiRequest } from "next";
+${start}
 
 export declare type ApiRoutesParams = {
   ${apiRouteParams.join(",")}
@@ -256,10 +259,17 @@ export declare type PageRoutesParams = {
   ${pageRoutesParams.join(",")}
 };
 
-export declare type RoutesParams = ApiRoutesParams & PageRoutesParams;
 export declare type ApiRoute = keyof ApiRoutesParams;
 export declare type PageRoute = keyof PageRoutesParams;
 export declare type Route = ApiRoute | PageRoute;
+export declare type RoutesParams = ApiRoutesParams & PageRoutesParams;
+
+export declare const getRoute: <T extends Route>() => T extends ApiRoute ? {
+  getRequestParams: (request: NextApiRequest) => ApiRoutesParams[T];
+} : {
+  useRouter: () => { routeParams: PageRoutesParams[T] };
+  getServerSideParams: (context: GetServerSidePropsContext) => PageRoutesParams[T];
+};
 `,
       {
         parser: "typescript",

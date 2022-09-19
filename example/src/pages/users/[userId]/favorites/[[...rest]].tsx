@@ -1,15 +1,18 @@
-import { useRouterWithSSR } from "../../../../routes";
+import { getRoute } from "next-type-routes";
+
+// TODO: Check why this getRoute is not generated
+const route = getRoute<"/users/[userId]/favorites/[[...rest]]">();
 
 export default function FavoritesArea() {
-  const { params } = useRouterWithSSR("/users/[userId]/favorites/[[...rest]]");
-  const { userId, rest } = params.route; // userId is string, rest is string[] | undefined
+  const { routeParams } = route.useRouter();
+  const { userId, rest } = routeParams; // userId is string, rest is string[] | undefined
 
   return (
     <>
       <h1>Favorites area</h1>
 
       <code>
-        <pre>{JSON.stringify(params.route, null, 2)}</pre>
+        <pre>{JSON.stringify(routeParams, null, 2)}</pre>
       </code>
     </>
   );

@@ -1,5 +1,7 @@
 import { GetServerSideProps } from "next";
-import { useRouterWithSSR } from "../../../../routes";
+import { getRoute } from "next-type-routes";
+
+const route = getRoute<"/users/[userId]/repositories/[repositoryId]">();
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -7,12 +9,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 };
 
 export default function RepositoryPage() {
-  // We can use useRouterWithSSR since getServerSideProps is also used
-  const { params } = useRouterWithSSR(
-    "/users/[userId]/repositories/[repositoryId]",
-  );
-
-  const { userId, repositoryId } = params.route; // userid and repositoryId type is guaranteed to be string
+  const { routeParams } = route.useRouter();
+  const { userId, repositoryId } = routeParams; // userid and repositoryId type is guaranteed to be string
 
   return (
     <>
@@ -21,7 +19,7 @@ export default function RepositoryPage() {
       </h1>
 
       <code>
-        <pre>{JSON.stringify(params.route, null, 2)}</pre>
+        <pre>{JSON.stringify(routeParams, null, 2)}</pre>
       </code>
     </>
   );

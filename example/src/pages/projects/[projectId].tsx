@@ -1,8 +1,11 @@
 import { useRouterWithNoSSR } from "../../routes";
+import { getRoute } from "next-type-routes";
+
+const route = getRoute<"/projects/[projectId]">();
 
 export default function ProjectPage() {
-  const { params } = useRouterWithNoSSR("/projects/[projectId]");
-  const { projectId } = params.route; // projectId is string | undefined as no SSR is used
+  const { routeParams } = route.useRouter();
+  const { projectId } = routeParams;
 
   if (projectId == null) {
     return <span>Loading…</span>;
@@ -13,7 +16,7 @@ export default function ProjectPage() {
       <h1>{projectId} project</h1>
 
       <code>
-        <pre>{JSON.stringify(params.route, null, 2)}</pre>
+        <pre>{JSON.stringify(routeParams, null, 2)}</pre>
       </code>
     </>
   );

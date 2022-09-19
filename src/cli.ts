@@ -53,7 +53,7 @@ const getRouteFiles = (pagesDir: string) =>
 const getRoutePath = ({ dir, name }: path.ParsedPath) =>
   `/${dir}${name === "index" ? "" : `/${name}`}`;
 
-const generateFile = async (filePath: string) => {
+const main = async () => {
   const rootDir = pkgDir.sync() ?? process.cwd();
 
   // https://github.com/blitz-js/blitz/blob/canary/nextjs/packages/next/build/utils.ts#L54-L59
@@ -189,9 +189,8 @@ export declare type ApiRoutes = [
 const program = new Command();
 
 program
-  .command("generate", { isDefault: true })
-  .argument("<filePath>", "file path")
-  .description("generate the routes file")
-  .action((arg: string) => generateFile(arg)); // TODO: Remove the need for an argument
+  .command("run", { isDefault: true })
+  .description("generate the user types file and edit project files")
+  .action(main);
 
 program.parse(process.argv);

@@ -1,7 +1,7 @@
+import "../main.css";
+
 import type { AppProps } from "next/app";
 import Link from "next/link";
-import "../main.css";
-import { createURL } from "../routes";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -19,9 +19,26 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           width: 200,
         }}
       >
-        <Link href={createURL("/")}>Home</Link>
-        <Link href={createURL("/users")}>Users</Link>
-        <Link href={createURL("/projects")}>Projects</Link>
+        <Link
+          // href={createURL("/")}
+          href="#"
+        >
+          Home
+        </Link>
+
+        <Link
+          // href={createURL("/users")}
+          href="#"
+        >
+          Users
+        </Link>
+
+        <Link
+          // href={createURL("/projects")}
+          href="#"
+        >
+          Projects
+        </Link>
       </nav>
 
       <main

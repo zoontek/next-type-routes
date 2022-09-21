@@ -1,7 +1,4 @@
 import { GetServerSideProps } from "next";
-import { getRoute } from "next-type-routes";
-
-const route = getRoute<"/users/[userId]/repositories/[repositoryId]">();
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async () => {

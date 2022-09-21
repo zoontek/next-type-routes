@@ -1,9 +1,5 @@
 import { GetServerSideProps } from "next";
 import Link from "next/link";
-import { createURL } from "../../../routes";
-import { getRoute } from "next-type-routes";
-
-const route = getRoute<"/users/[userId]">();
 
 // This page is rendered on the server
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -24,12 +20,16 @@ export default function UserPage() {
       <h1>{userId}</h1>
       <p>{userId} homepage</p>
 
-      <Link href={createURL("/users/[userId]/repositories", { userId })}>
+      <Link
+        // href={createURL("/users/[userId]/repositories", { userId })}
+        href="#"
+      >
         Repositories
       </Link>
 
       <Link
-        href={createURL("/users/[userId]/favorites/[[...rest]]", { userId })}
+        // href={createURL("/users/[userId]/favorites/[[...rest]]", { userId })}
+        href="#"
       >
         Favorites
       </Link>

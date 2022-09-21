@@ -17,4 +17,7 @@ export const getRoute = <T extends Route>(): T extends ApiRoute
       getServerSideParams: (
         context: GetServerSidePropsContext,
       ) => PageRoutesParams[T];
-    } => {};
+    } => {
+  // @ts-expect-error
+  return {};
+};

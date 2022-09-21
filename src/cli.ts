@@ -72,7 +72,7 @@ const main = async () => {
 
   const fileParsedPaths = getRouteFiles(pagesDir);
 
-  const files = fileParsedPaths.map((file) =>
+  const filePaths = fileParsedPaths.map((file) =>
     path.join(pagesDir, file.dir, file.base),
   );
 
@@ -80,8 +80,10 @@ const main = async () => {
     compilerOptions: { target: ScriptTarget.Latest },
   });
 
-  const sourceFiles = project.addSourceFilesAtPaths(files);
-  // const isApiFile = relativePath.startsWith("api/");
+  // Don't use addSourceFilesAtPaths since it parses globs
+  const sourceFiles = filePaths.map((filePath) =>
+    project.addSourceFileAtPath(filePath),
+  );
 
   sourceFiles.forEach((sourceFile) => {
     const filePath = sourceFile.getFilePath();
